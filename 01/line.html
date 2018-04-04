@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<style>
+
+html,div,body{
+    padding: 0;
+    margin: 0;
+}
+
+body{
+    background-color: cadetblue
+}
+
+canvas{
+    display: block;
+    margin: 100px auto;
+    background-color: aliceblue;
+
+}
+
+
+</style>
+
+<body>
+    <canvas id="canvas" width="1000" height="1000">
+
+        
+    </canvas>
+
+<script>
+var canvas=document.getElementById("canvas");
+
+var context=canvas.getContext("2d");
+
+var x=100;
+var y=100;
+var length=300;
+
+(function(x,y,length) {
+   context.strokeStyle='red';
+   context.lineWidth=10;
+   context.lineJoin="round"
+   context.lineCap="round"
+   context.beginPath();
+   
+    context.moveTo(x,y);
+    x+=Math.sin(30.0/180*Math.PI)*length;
+    y+=Math.cos(30.0/180*Math.PI)*length;
+    context.lineTo(x,y);
+    x+=Math.sin(60.0/180*Math.PI)*length;
+    y+=Math.cos(60.0/180*Math.PI)*length;
+    context.lineTo(x,y);
+    context.stroke();
+
+})(x,y,length)
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

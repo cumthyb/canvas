@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+    html,
+    body,
+    div,
+    canvas {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background-color: #272822
+    }
+
+    #container {
+        display: block;
+        margin: 50px auto;
+
+        width: 600px;
+    }
+
+    #tools>button {
+        margin-right: 20px;
+        cursor: pointer;
+    }
+
+    #canvas {
+        background-color: aliceblue;
+        border: 1px solid red
+    }
+</style>
+
+<body>
+
+    <div id="container">
+        <div id="tools">
+            <button id="clear">清除</button>
+
+            <button id="line">画线</button>
+
+            <button id="circle">画圆</button>
+        </div>
+        <canvas id="canvas" width="600" height="600">
+            浏览器不支持canvas
+        </canvas>
+
+    </div>
+
+    <script>
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        const cw = canvas.width;
+        const ch = canvas.height;
+        const ol = canvas.offsetLeft;
+        const ot = canvas.offsetTop;
+        var btnClear = document.getElementById("clear");
+        var btnLine = document.getElementById("line");
+        var btnCircle = document.getElementById("circle");
+
+        btnClear.onclick = function () {
+            ctx.clearRect(0, 0, cw, ch);
+        }
+
+
+        btnLine.onclick = function () {
+            document.onmousedown = function (e) {
+                console.log(e.clientX + "," + e.clientY)
+                ctx.beginPath();
+                ctx.moveTo(e.clientX - ol, e.clientY - ot);
+                document.onmousemove = function (e) {
+                    ctx.lineTo(e.clientX - ol, e.clientY - ot)
+                    ctx.stroke();
+                }
+            }
+
+            document.onmouseup = function () {
+                document.onmousemove = null;
+            }
+        }
+
+
+
+        btnCircle.onclick = function () {
+            let x0; let y0;
+            document.onmousedown = function (e) {
+
+                ctx.beginPath();
+
+                x0 = e.clientX;
+                y0 = e.clientY;
+            }
+
+            document.onmouseup = function (e) {
+                let x1 = e.clientX;
+                let y1 = e.clientY;
+
+                let r = Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1))
+                console.log(e.clientX - ol + "," + e.clientY - ot)
+                ctx.arc((""+(e.clientX - ol), e.clientY - ot, r, 0, 2 * Math.PI, false));
+                ctx.stroke();
+            }
+        }
+
+    </script>
+</body>
+
+</html>
