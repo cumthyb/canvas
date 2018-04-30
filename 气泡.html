@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>气泡</title>
+    <style>
+        #canvas {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas">
+        不支持canvas
+    </canvas>
+</body>
+
+<script>
+    var _canvas = document.getElementById("canvas"),
+        _ctx = canvas.getContext('2d'),
+        _colorArray = ['#00FF7F', '#66CDAA', '#FF7F24', '#C1CDC1', '#B5B5B5'],
+        _bubbleArrary = [], //气泡数组
+        _canvasHeight = 0,
+        _canvasWidth = 0,
+        _mouseX = 0,
+        _mouseY = 0,
+        _timer;
+
+
+    _canvas.onmousemove = function(e) {
+        _mouseX = e.clientX;
+        _mouseY = e.clientY;
+    }
+
+
+    //自适应窗口
+    window.addEventListener("resize", resizeCanvas, false);
+
+    function resizeCanvas() {
+        if (!!_canvas) {
+            _canvasHeight = _canvas.height = window.innerHeight;
+            _canvasWidth = _canvas.width = window.innerWidth;
+        }
+        run();
+    }
+
+    resizeCanvas();
+
+    class Bubble {
+
+        constructor(cx, cy, r, color) {
+            this.centerX = cx; //初始位置x
+            this.centerY = cy; //初始位置y
+            this.radius = r; //半径
+            this.originalRadius = r;
+            this.fillColor = color ? color : this.colorDic[Math.floor((Math.random() * 4))];
+            this.vx = 0;
+            this.vy = 0;
+            this.maxRadius = 5;
+            this.getMoveStep();
+        }
+
+        getMoveStep() {
+            //确定x移动方向 大小           
+            //确定y移动方向 大小
+            if (Math.floor(Math.random() * 2) == 1) {
+                this.vx = -Math.random() * 1;
+            } else {
+                this.vx = Math.random() * 1;
+            }
+
+            if (Math.floor(Math.random() * 2) == 1) {
+                this.vy = -Math.random() * 1;
+            } else {
+                this.vy = Math.random() * 1;
+            }
+        }
+
+        draw() {
+            _ctx.beginPath();
+            _ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2)
+            _ctx.fillStyle = this.fillColor;
+            _ctx.fill();
+        }
+
+        move() {
+            if (this.centerX + this.radius > this.boundary.right || this.centerX - this.radius < this.boundary.left) {
+                this.vx = -this.vx;
+            };
+            if (this.centerY + this.radius > this.boundary.bottom || this.centerY - this.radius < this.boundary.top) {
+                this.vy = -this.vy;
+            };
+            this.centerX += this.vx;
+
+            this.centerY += this.vy;
+
+            let xDistance = Math.abs(_mouseX - this.centerX);
+            let yDistance = Math.abs(_mouseY - this.centerY);
+
+            if (xDistance < 50 && this.radius < this.maxRadius && yDistance < 50) {
+                this.radius += 30;
+            } else if ((xDistance >= 50 && this.originalRadius < this.radius) || (yDistance >= 50 && this.originalRadius < this.radius)) {
+                if (this.radius > 3) {
+                    this.radius -= 2;
+                }
+            };
+            this.draw();
+        }
+
+    }
+
+    (function initCanvas(params) {
+        Bubble.prototype.boundary = {
+            left: 0,
+            top: 0,
+            right: _canvasWidth,
+            bottom: _canvasHeight
+        }
+        Bubble.prototype.colorDic = _colorArray;
+        Bubble.prototype.maxRadius = 10;
+        //循环气泡数量，将随机数据 push 到 circleArray 数组中
+        for (let i = 0; i < 500; i++) {
+            let randomXCoordinate = Math.random() * _canvasWidth;
+            let randomYCoordinate = Math.random() * _canvasHeight;
+            let randomRadius = Math.random() * 10;
+            _bubbleArrary.push(new Bubble(randomXCoordinate, randomYCoordinate, randomRadius))
+        }
+    }())
+
+    function run(params) {
+        _ctx.clearRect(0, 0, _canvasWidth, _canvasHeight); //清空 Canvas
+        for (var i = 0; i < _bubbleArrary.length; i++) {
+            _bubbleArrary[i].move();
+        }
+        clearTimeout(_timer);
+        _timer = setTimeout(run, 10)
+    }
+    run()
+</script>
+
+</html>
