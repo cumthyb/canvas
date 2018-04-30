@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #canvas {
+            background-color: black
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas">
+        不支持Canvase
+    </canvas>
+    <script>
+        var _canvas = document.getElementById('canvas');
+        var _ctx = _canvas.getContext("2d");
+        var _mouseX,
+            _mouseY,
+            _particleArray = [],
+            _colors = ["#468966", "#FFF0A5", "#FFB03B", "#B64926", "#8E2800"],
+            _radius = 1;
+
+
+        var _ww = canvas.width = window.innerWidth;
+        var _wh = canvas.height = window.innerHeight;
+        var _text = "👍";
+
+
+        class Particle {
+            constructor(cx, cy, r, color) {
+                this.x = Math.random() * _ww; //初始位置x 当前x
+                this.y = Math.random() * _wh; //初始位置y 当前y
+                this.cx = cx;
+                this.cy = cy;
+                this.color = color;
+                this.r = r;
+
+                this.vx = (Math.random() - 0.5) * 20;
+                this.vy = (Math.random() - 0.5) * 20;
+
+                this.friction = Math.random() * 0.05 + 0.94; //随机摩擦力（缓冲的动画效果）
+            }
+        }
+
+        Particle.prototype.render = function() {
+            this.accX = (this.cx - this.x) / 1000; //距离目标的距离 1000步
+            this.accY = (this.cy - this.y) / 1000;
+            this.vx += this.accX;
+            this.vy += this.accY;
+            this.vx *= this.friction; //摩擦效果
+            this.vy *= this.friction;
+
+            this.x += this.vx;
+            this.y += this.vy;
+
+            _ctx.fillStyle = this.color;
+            _ctx.beginPath();
+            _ctx.arc(this.x, this.y, this.r, Math.PI * 2, false);
+            _ctx.fill();
+
+            let detaX = this.cx - _mouseX;
+            let detaY = this.cy - _mouseY;
+
+            let distance = Math.sqrt(detaX * detaX + detaY * detaY);
+            if (distance < (_radius * 70)) {
+                this.accX = (this.cx - _mouseX) / 100;
+                this.accY = (this.cy - _mouseY) / 100;
+                this.vx += this.accX;
+                this.vy += this.accY;
+            }
+        }
+
+
+        _canvas.onmousemove = function(e) {
+            _mouseX = e.clientX;
+            _mouseY = e.clientY;
+        }
+
+        _canvas.onmouseclick = function() {
+            _radius++;
+            if (_radius === 5) {
+                _radius = 0;
+            }
+        }
+
+        function init() {
+            _ctx.clearRect(0, 0, _canvas.width, _canvas.height); //清空 Canvas
+
+            _ctx.font = "bold " + (_ww / 8) + "px sans-serif";
+            _ctx.textAlign = "center";
+            _ctx.fillStyle = "tomato";
+            _ctx.fillText(_text, _ww / 2, _wh / 2); //将 Input 中输入的值，打印在 Canvas 上
+
+            var data = _ctx.getImageData(0, 0, _ww, _wh).data; //获取_text图像数据
+            //对于 ImageData 对象中的每个像素，都存在着四方面的信息，即 RGBA 值：
+            // R - 红色 (0-255)
+            // G - 绿色 (0-255)
+            // B - 蓝色 (0-255)
+            // A - alpha 通道 (0-255; 0 是透明的，255 是完全可见的)
+            // color/alpha 以数组形式存在，并存储于 ImageData 对象的 data 属性中。
+
+            _ctx.globalCompositeOperation = "source-over";
+
+
+            for (var i = 0; i < _ww; i += Math.round(_ww / 200)) { //抽稀采集像素
+                for (var j = 0; j < _wh; j += Math.round(_wh / 200)) { //抽稀采集像素
+
+                    if (data[((i + j * _ww) * 4) + 3] > 150) {
+                        let r = Math.random() * 5 + 2; //随机半径（颗粒大小）
+                        let colorIndex = Math.floor(Math.random() * _colors.length);
+                        _particleArray.push(new Particle(i, j, r, _colors[colorIndex])); //将图像数据经过 Particle 函数处理后 push 到 particles 数组中
+                    }
+                }
+            }
+        }
+
+        function canvasRender() {
+
+            _ctx.clearRect(0, 0, _canvas.width, _canvas.height); //清空 Canvas
+            for (var i = 0; i < _particleArray.length; i++) {
+                _particleArray[i].render(); //循环 particles 数组渲染
+            }
+            requestAnimationFrame(canvasRender);
+        }
+        init();
+        canvasRender();
+    </script>
+</body>
+
+</html>
