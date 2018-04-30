@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #canvas {
+            background-color: black
+        }
+    </style>
+
+</head>
+
+<body>
+    <canvas id="canvas">
+                不支持Canvase
+            </canvas>
+    <script>
+        var _canvas = document.getElementById('canvas');
+        var _ctx = _canvas.getContext("2d");
+        var _mouseX,
+            _mouseY,
+            _particleArray = [],
+            _cw,
+            _ch,
+            probability = 0.04, //0.04 烟花出现概率
+            xPoint, yPoint;
+
+
+        (function resizeCanvas() {
+            if (!!_canvas) {
+                _cw = _canvas.width = window.innerWidth;
+                _ch = _canvas.height = window.innerHeight;
+            }
+        }())
+
+        function updateWorld() {
+            update();
+            paint();
+            window.requestAnimationFrame(updateWorld);
+        }
+
+        //更新函数
+        function update() {
+            if (_particleArray.length < 500 && Math.random() < probability) {
+                createFirework();
+            }
+            var alive = [];
+            for (var i = 0; i < _particleArray.length; i++) {
+                if (_particleArray[i].move()) {
+                    alive.push(_particleArray[i]);
+                }
+            }
+            _particleArray = alive;
+        }
+
+        //绘制函数
+        function paint() {
+            _ctx.globalCompositeOperation = 'source-over';
+            _ctx.fillStyle = "rgba(0,0,0,0.2)";
+            _ctx.fillRect(0, 0, _cw, _ch);
+            _ctx.globalCompositeOperation = 'lighter';
+            for (var i = 0; i < _particleArray.length; i++) {
+                _particleArray[i].draw(_ctx);
+            }
+        }
+
+        //创建烟花颗粒
+        function createFirework() {
+            xPoint = Math.random() * (_cw - 200) + 100;
+            yPoint = Math.random() * (_ch - 200) + 100;
+            var nFire = Math.random() * 50 + 100;
+            var c = "rgb(" + (~~(Math.random() * 200 + 55)) + "," + (~~(Math.random() * 200 + 55)) + "," + (~~(Math.random() * 200 + 55)) + ")";
+            for (var i = 0; i < nFire; i++) {
+                var particle = new Particle();
+                particle.color = c;
+                var vy = Math.sqrt(25 - particle.vx * particle.vx);
+                if (Math.abs(particle.vy) > vy) {
+                    particle.vy = particle.vy > 0 ? vy : -vy;
+                }
+                _particleArray.push(particle);
+            }
+        }
+
+        //颗粒函数
+        function Particle() {
+            this.w = this.h = Math.random() * 4 + 1;
+
+            this.x = xPoint - this.w / 2;
+            this.y = yPoint - this.h / 2;
+
+            this.vx = (Math.random() - 0.5) * 10;
+            this.vy = (Math.random() - 0.5) * 10;
+
+            this.alpha = Math.random() * .5 + .5;
+
+            this.color;
+        }
+
+        Particle.prototype = {
+            gravity: 0.05, //烟花颗粒坠落速度
+            move: function() { //改变烟花颗粒位置
+                this.x += this.vx;
+                this.vy += this.gravity;
+                this.y += this.vy;
+                this.alpha -= 0.01;
+                if (this.x <= -this.w || this.x >= screen.width || this.y >= screen.height || this.alpha <= 0) {
+                    return false;
+                }
+                return true;
+            },
+            draw: function(ctx) { //渲染烟花颗粒
+                ctx.save();
+                ctx.beginPath();
+
+                ctx.translate(this.x + this.w / 2, this.y + this.h / 2); //改变位置
+                ctx.arc(0, 0, this.w, 0, Math.PI * 2); //圆形颗粒
+                ctx.fillStyle = this.color; //填充颜色
+                ctx.globalAlpha = this.alpha; //透明度
+
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        updateWorld();
+    </script>
+</body>
+
+</html>
