@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id='canvas'></canvas>
+    <script>
+        var oC = document.getElementById('canvas');
+        var _ctx = oC.getContext('2d');
+        var _cw = oC.width = window.innerWidth,
+            _ch = oC.height = window.innerHeight,
+            _timer,
+            _mouseX,
+            _mouseY,
+            _particleArray = [],
+            _colors = ["#468966", "#FFF0A5", "#FFB03B", "#B64926", "#8E2800"],
+            _radius = 1;
+
+        oC.onmousemove = function(e) {
+            _mouseX = e.clientX;
+            _mouseY = e.clientY;
+        }
+
+        window.onresize = function() {
+            _cw = oC.width = window.innerWidth;
+            _ch = oC.height = window.innerHeight;
+        }
+
+
+        class Particle {
+            constructor(cx, cy, r, speed, color) {
+                this.centerX = cx; //初始位置x
+                this.centerY = cy; //初始位置y
+                this.radius = r; //半径
+                this.speed = speed;
+                this.fillColor = color;
+                this.vx = 0;
+                this.vy = 0;
+                this.maxRadius = 5;
+                this.getMoveStep();
+            }
+
+            getMoveStep() {
+                //确定x移动方向 大小           
+                //确定y移动方向 大小
+                if (Math.floor(Math.random() * 2) == 1) {
+                    this.vx = -Math.random() * 1;
+                } else {
+                    this.vx = Math.random() * 1;
+                }
+                this.vx *= this.speed;
+                if (Math.floor(Math.random() * 2) == 1) {
+                    this.vy = -Math.random() * 1;
+                } else {
+                    this.vy = Math.random() * 1;
+                }
+                this.vy *= this.speed;
+            }
+
+            draw() {
+                _ctx.beginPath();
+                _ctx.arc(this.centerX, this.centerY, this.radius, 0, Math.PI * 2)
+                _ctx.fillStyle = this.fillColor;
+                _ctx.fill();
+            }
+
+            move() {
+                if (this.centerX + this.radius > this.boundary.right || this.centerX - this.radius < this.boundary.left) {
+                    this.vx = -this.vx;
+                };
+                if (this.centerY + this.radius > this.boundary.bottom || this.centerY - this.radius < this.boundary.top) {
+                    this.vy = -this.vy;
+                };
+                this.centerX += this.vx;
+
+                this.centerY += this.vy;
+
+
+                let xDistance = Math.abs(_mouseX - this.centerX);
+                let yDistance = Math.abs(_mouseY - this.centerY);
+
+                if (xDistance < 150 && yDistance < 150) {
+                    _ctx.globalCompositeOperation = "source-over";
+                    _ctx.beginPath();
+                    _ctx.moveTo(_mouseX, _mouseY);
+                    _ctx.lineTo(this.centerX, this.centerY)
+                    _ctx.strokeStyle = this.fillColor;
+                    _ctx.stroke();
+                }
+                this.draw();
+
+                return [this.centerX, this.centerY];
+            }
+        }
+
+        Particle.prototype.boundary = {
+            left: 0,
+            top: 0,
+            right: _cw,
+            bottom: _ch
+        };
+
+
+        (function initCanvas(params) {
+
+            //循环气泡数量，将随机数据 push 到 circleArray 数组中
+            for (let i = 0; i < 250; i++) {
+                let randomXCoordinate = Math.random() * _cw;
+                let randomYCoordinate = Math.random() * _ch;
+                let randomRadius = Math.random() * 5;
+                let speed = Math.random() * 10;
+                _particleArray.push(new Particle(randomXCoordinate, randomYCoordinate, randomRadius, speed, '#DCDCDC'))
+            }
+        }())
+
+
+        function update(params) {
+            _ctx.clearRect(0, 0, _cw, _ch); //清空 Canvas
+            for (var i = 0; i < _particleArray.length; i++) {
+                let [x, y] = _particleArray[i].move();
+                _particleArray[i].centerX = x;
+                _particleArray[i].centerY = y;
+            }
+
+            for (var i = 0; i < _particleArray.length; i++) {
+                let p_this = _particleArray[i];
+                for (var j = 0; j < _particleArray.length; j++) {
+                    let p_other = _particleArray[j];
+                    // if (i + j < _particleArray.length)
+                    {
+                        if (Math.abs(p_this.centerX - p_other.centerX) < 100 && Math.abs(p_this.centerY - p_other.centerY) < 100) {
+                            // _ctx.globalCompositeOperation = "source-over";
+                            _ctx.beginPath();
+                            _ctx.moveTo(p_this.centerX, p_this.centerY);
+                            _ctx.lineTo(p_other.centerX, p_other.centerY)
+                            _ctx.strokeStyle = '#DCDCDC';
+                            _ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            clearTimeout(_timer);
+            _timer = setTimeout(update, 50)
+        }
+        update()
+    </script>
+</body>
+
+</html>
