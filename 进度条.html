@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        
+        body {
+            position: relative;
+            background-color: #F3F0EB;
+        }
+        
+        #container {
+            box-sizing: border-box;
+            width: 300px;
+            height: 300px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        #txt,
+        #bg,
+        #canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            box-sizing: border-box;
+        }
+        
+        #txt {
+            margin: 0;
+            padding: 0;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 300px;
+            font-size: 56px;
+            font-weight: lighter;
+            color: #999;
+        }
+        
+        #bg {
+            height: 300px;
+            width: 300px;
+            border-radius: 150px;
+            border: darkgray 10px solid;
+            opacity: 0.5;
+        }
+        
+        #progress {
+            transform: rotate(-90deg);
+            z-index: 2;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <p id="txt">0</p>
+        <div id="bg"></div>
+
+        <canvas id="progress" width="300" height="300"></canvas>
+
+    </div>
+
+    <script>
+        var canvas = document.getElementById('progress');
+        var _ctx = canvas.getContext('2d');
+        var _eTxt = document.getElementById('txt');
+        var _percent = 0,
+            _timer;
+
+        function updateProgress(params) {
+            _timer = setInterval(function(params) {
+                _percent = _percent === 100 ? 0 : _percent;
+                _percent++;
+                _eTxt.innerText = _percent + '%';
+                let loaded = _percent * 2 / 100 * Math.PI; //2*PI是结束角度，/100 是完成的百分比
+
+                _ctx.clearRect(0, 0, 300, 300); //清空矩形，宽/高204
+                _ctx.beginPath(); //开始绘制
+
+                //arc创建一个圆形（x,y（x+y是圆的中心点）,r（圆的半径）,起始角度（0），结束角度（loaded），False = 顺时针 & true = 逆时针）
+                _ctx.arc(150, 150, 145, 0, loaded, false);
+                _ctx.lineWidth = 8; //线条宽度
+                _ctx.strokeStyle = '#ff6000'; //颜色
+                _ctx.stroke();
+
+            }, 100)
+        }
+        updateProgress();
+    </script>
+
+
+</body>
+
+</html>
