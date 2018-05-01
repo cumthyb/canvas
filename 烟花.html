@@ -59,10 +59,10 @@
 
         //绘制函数
         function paint() {
-            _ctx.globalCompositeOperation = 'source-over';
+            // _ctx.globalCompositeOperation = 'source-over';
             _ctx.fillStyle = "rgba(0,0,0,0.2)";
             _ctx.fillRect(0, 0, _cw, _ch);
-            _ctx.globalCompositeOperation = 'lighter';
+            // _ctx.globalCompositeOperation = 'lighter';
             for (var i = 0; i < _particleArray.length; i++) {
                 _particleArray[i].draw(_ctx);
             }
@@ -106,7 +106,7 @@
                 this.x += this.vx;
                 this.vy += this.gravity;
                 this.y += this.vy;
-                this.alpha -= 0.01;
+                this.alpha -= 0.01; //改变粒子透明度 模拟粒子消散
                 if (this.x <= -this.w || this.x >= screen.width || this.y >= screen.height || this.alpha <= 0) {
                     return false;
                 }
